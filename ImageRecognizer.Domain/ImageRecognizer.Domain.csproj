@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Labels\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML" Version="1.7.1" />
+    <PackageReference Include="Microsoft.ML.Vision" Version="1.7.1" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.3.1" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup Label="FruitClassificator">
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+    <None Include="FruitClassificator.consumption.cs">
+      <DependentUpon>FruitClassificator.mbconfig</DependentUpon>
+    </None>
+    <None Include="FruitClassificator.training.cs">
+      <DependentUpon>FruitClassificator.mbconfig</DependentUpon>
+    </None>
+    <None Include="FruitClassificator.zip">
+      <DependentUpon>FruitClassificator.mbconfig</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

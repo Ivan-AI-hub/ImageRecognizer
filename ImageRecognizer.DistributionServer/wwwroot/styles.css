@@ -1,0 +1,18 @@
+﻿.loader-container {
+    width: 100%;
+    z-index: 1;
+    display: none; /* make the loader a flex container */
+    align-items: center; /* center the spinner vertically */
+    justify-content: center; /* center the spinner horizontally */
+}
+
+.images {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+}
+
+.images > img {
+    width: 50%;
+    height: auto;
+}
