@@ -1,20 +1,36 @@
-﻿using System.Drawing;
+﻿using Google.Protobuf;
+using System;
+using System.Drawing;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ImageRecognizer.Domain;
 
-public static class FruitHelper
+public class FruitHelper : IDisposable
 {
-    public static Color GetColor(string label)
+    private MD5 _hacher;
+    private Color[] _colors;
+
+    public FruitHelper(int alpha, int labelsCount)
     {
-        switch(label)
-        {
-            case "Banana": return Color.FromArgb(100, 227, 207, 87);
-            case "Carambula": return Color.FromArgb(100, Color.Yellow);
-            case "Lemon": return Color.FromArgb(100, 255, 255, 159);
-            case "Mango": return Color.FromArgb(100, 244, 187, 68);
-            case "Tomato Heart": return Color.FromArgb(100, 255, 99, 71);
-            case "Watermelon": return Color.FromArgb(100, Color.Green);
-            default: return Color.Black;
-        }
+        _hacher = MD5.Create();
+        _colors = ColorGenerator.Generate(alpha, labelsCount + 2).Skip(2).ToArray();
+    }
+
+    public void Dispose()
+    {
+        _hacher.Dispose();
+    }
+
+    public Color GetColor(string label)
+    {
+        int someHash = CalculateHash(label);
+        return _colors[someHash % _colors.Length];
+    }
+
+    private int CalculateHash(string message)
+    {
+        var hashed = _hacher.ComputeHash(Encoding.UTF8.GetBytes(message));
+        return Math.Abs(BitConverter.ToInt32(hashed, 0));
     }
 }

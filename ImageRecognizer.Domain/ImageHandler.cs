@@ -93,18 +93,20 @@ public static class ImageHandler
         Console.WriteLine($"Window ({width}X{height})");
         Console.WriteLine($"Reminder ({widthReminder}X{heightReminder})");
 
+        using FruitHelper helper = new FruitHelper(100, 28);
+
         for (int i = 0; i < image.Width; i += width)
         {
             for (int j = 0; j < image.Height; j += height)
             {
-                PredictProcess(image, outputImage, i, j, width, height);
+                PredictProcess(image, outputImage, i, j, width, height, helper);
             }
         }
 
         return outputImage;
     }
 
-    private static void PredictProcess(Bitmap image, Bitmap outputImage, int pointX, int pointY, int windowWidth, int windowHeight)
+    private static void PredictProcess(Bitmap image, Bitmap outputImage, int pointX, int pointY, int windowWidth, int windowHeight, FruitHelper helper, int iteration = 1 )
     {
         var point = new Point(pointX, pointY);
         var size = new Size(windowWidth, windowHeight);
@@ -120,19 +122,31 @@ public static class ImageHandler
 
         var output = FruitClassificator.Predict(sampleData);
 
-        if (output.Score.Max() > 0.9)
+        if (output.Score.Max() > 0.9 || iteration == 3)
         {
             using Graphics gfx = Graphics.FromImage(outputImage);
-            using SolidBrush brush = new SolidBrush(FruitHelper.GetColor(output.PredictedLabel));
+            using SolidBrush brush = new SolidBrush(helper.GetColor(output.PredictedLabel));
 
             var rect = new RectangleF(point, size);
 
             gfx.FillRectangle(brush, rect);
 
+            var labels = FruitClassificator.GetSortedScoresWithLabels(output).Take(3);
+            var text = string.Join("\n", labels.Select(l => $"{string.Join("", l.Key.Take(5))}: {l.Value.ToString("0.00")}"));
             gfx.SmoothingMode = SmoothingMode.AntiAlias;
             gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
             gfx.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            gfx.DrawString(output.PredictedLabel, new Font("Tahoma", 14), Brushes.Black, rect);
+            gfx.DrawString(text, new Font("Tahoma", 10), Brushes.Black, rect);
         }
+        else
+        {
+            for (int i = 0; i < windowWidth; i += windowWidth/2)
+            {
+                for (int j = 0; j < windowHeight; j += windowHeight/2)
+                {
+                    PredictProcess(image, outputImage, pointX + i, pointY + j, windowWidth/2, windowHeight/2, helper, iteration + 1);
+                }
+            }
+        }    
     }
 }

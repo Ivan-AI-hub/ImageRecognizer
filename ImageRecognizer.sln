@@ -11,12 +11,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageRecognizer.TestClient"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageRecognizer.Domain", "ImageRecognizer.Domain\ImageRecognizer.Domain.csproj", "{6E5CD751-BD35-4A36-8ED3-F5FA85FB5303}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageRecognizer.DistributionServer", "ImageRecognizer.DistributionServer\ImageRecognizer.DistributionServer.csproj", "{D8322096-BA28-4E4C-90DE-C065E343CB6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageRecognizer.DistributionServer", "ImageRecognizer.DistributionServer\ImageRecognizer.DistributionServer.csproj", "{D8322096-BA28-4E4C-90DE-C065E343CB6B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E0BAC813-F86D-4DDB-8AF9-6725F5460F4D}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MLDataPrep", "MLDataPrep\MLDataPrep.csproj", "{2CEB0D96-4BA8-4F52-BCD9-2B6083111325}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +46,10 @@ Global
 		{D8322096-BA28-4E4C-90DE-C065E343CB6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8322096-BA28-4E4C-90DE-C065E343CB6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8322096-BA28-4E4C-90DE-C065E343CB6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CEB0D96-4BA8-4F52-BCD9-2B6083111325}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CEB0D96-4BA8-4F52-BCD9-2B6083111325}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CEB0D96-4BA8-4F52-BCD9-2B6083111325}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CEB0D96-4BA8-4F52-BCD9-2B6083111325}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

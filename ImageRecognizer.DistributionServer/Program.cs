@@ -21,8 +21,6 @@ while (true)
 {
     var client = await server.GetContextAsync();
 
-    Console.WriteLine("+1 request");
-
     ThreadPool.QueueUserWorkItem((status) => HandleClientsAsync(client));
 }
 
@@ -58,10 +56,10 @@ async void HandleClientsAsync(HttpListenerContext client)
                 var content = request.GetData<PictureRequest>();
 
                 var image = ImageHandler.ConvertBase64ToBitmap(content.Picture.Base64Content);
-                if (image.Width > maxWidth && image.Height > maxHeight)
-                {
-                    image = ImageHandler.ResizeImage(image, maxWidth, maxHeight, true);
-                }
+                //if (image.Width > maxWidth && image.Height > maxHeight)
+                //{
+                //    image = ImageHandler.ResizeImage(image, maxWidth, maxHeight, true);
+                //}
 
                 int windowsByUnits = 0;
                 int units = logicUnitsPorts.Count + 1;
@@ -72,7 +70,12 @@ async void HandleClientsAsync(HttpListenerContext client)
                 {
                     units--;
 
-                    if (windows % units == 0)
+                    if (units == 0)
+                    {
+                        units = 1;
+                        windowsByUnits = 1;
+                    }
+                    else if (windows % units == 0)
                     {
                         windowsByUnits = windows / units;
                     }          
