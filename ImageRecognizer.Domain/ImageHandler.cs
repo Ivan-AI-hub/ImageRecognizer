@@ -17,14 +17,33 @@ public static class ImageHandler
 
         return new Bitmap(memoryStream);
     }
-    public static Bitmap ResizeImage(Image image, int width, int height)
+    public static Bitmap ResizeImage(Image image, int width, int height, bool preserveAspectRatio)
     {
-        var destRect = new Rectangle(0, 0, width, height);
-        var destImage = new Bitmap(width, height);
+        int drawWidth = width;
+        int drawHeight = height;
 
-        destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+        if (preserveAspectRatio)
+        {
+            int originalWidth = image.Width;
+            int originalHeight = image.Height;
+            float percentWidth = (float)width / (float)originalWidth;
+            float percentHeight = (float)height / (float)originalHeight;
+            float percent = percentHeight < percentWidth ? percentHeight : percentWidth;
+            drawWidth = (int)(originalWidth * percent);
+            drawHeight = (int)(originalHeight * percent);
+        }
+        else
+        {
+            drawWidth = width;
+            drawHeight = height;
+        }
 
-        using (var graphics = Graphics.FromImage(destImage))
+        var ResizeImage = new Rectangle(0, 0, drawWidth, drawHeight);
+        var dest_Image = new Bitmap(drawWidth, drawHeight);
+
+        dest_Image.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+        using (var graphics = Graphics.FromImage(dest_Image))
         {
             graphics.CompositingMode = CompositingMode.SourceCopy;
             graphics.CompositingQuality = CompositingQuality.HighQuality;
@@ -32,14 +51,14 @@ public static class ImageHandler
             graphics.SmoothingMode = SmoothingMode.HighQuality;
             graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            using var wrapMode = new ImageAttributes();
-
-            wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-            graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+            using (var wrapMode = new ImageAttributes())
+            {
+                wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                graphics.DrawImage(image, ResizeImage, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+            }
         }
 
-        image.Dispose();
-        return destImage;
+        return dest_Image;
     }
 
     public static Bitmap CropImage(Bitmap image, Point point, Size size)

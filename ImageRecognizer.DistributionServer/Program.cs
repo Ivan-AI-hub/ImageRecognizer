@@ -60,7 +60,7 @@ async void HandleClientsAsync(HttpListenerContext client)
                 var image = ImageHandler.ConvertBase64ToBitmap(content.Picture.Base64Content);
                 if (image.Width > maxWidth && image.Height > maxHeight)
                 {
-                    image = ImageHandler.ResizeImage(image, maxWidth, maxHeight);
+                    image = ImageHandler.ResizeImage(image, maxWidth, maxHeight, true);
                 }
 
                 int windowsByUnits = 0;
@@ -109,9 +109,6 @@ async void HandleClientsAsync(HttpListenerContext client)
 
                     var picture = new Picture(Convert.ToBase64String(croppedBytes), content.Picture.Name);
 
-                    var folder = "D:\\For laba\\1.Ready laboratory\\4 course\\Курс\\PSP\\ImageRecognizer\\ImageRecognizer.DistributionServer\\Results\\";
-                    var fileName = $"{i}.txt";
-                    File.WriteAllText(folder + fileName, picture.Base64Content);
                     var pictureRequest = new PictureRequest()
                     {
                         Picture = picture,
@@ -147,10 +144,6 @@ async void HandleClientsAsync(HttpListenerContext client)
 
                     gr.DrawImage(ImageHandler.ConvertBase64ToBitmap(heatMap.HeatMapBase64), point.X, point.Y, size.Width, size.Height);
                 }
-                //var outputBase64 = Convert.ToBase64String(ImageHandler.ConvertImageToByteArray(outputImage));
-                //var folder = "D:\\For laba\\1.Ready laboratory\\4 course\\Курс\\PSP\\ImageRecognizer\\ImageRecognizer.DistributionServer\\Results\\";
-                //var fileName = $"{Guid.NewGuid()}.jpeg";
-                //outputImage.Save($"{folder}{fileName}");
 
                 image.Dispose();
                 Console.WriteLine("Image processing stop");
