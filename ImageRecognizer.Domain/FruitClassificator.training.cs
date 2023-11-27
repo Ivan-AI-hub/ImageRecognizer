@@ -9,7 +9,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Vision;
 using Microsoft.ML;
 
-namespace ImageRecognizer_Domain
+namespace ImageRecognizer_LogicUnit
 {
     public partial class FruitClassificator
     {

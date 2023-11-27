@@ -1,4 +1,4 @@
-﻿using ImageRecognizer_Domain;
+﻿using ImageRecognizer_LogicUnit;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -106,8 +106,12 @@ public static class ImageHandler
         return outputImage;
     }
 
-    private static void PredictProcess(Bitmap image, Bitmap outputImage, int pointX, int pointY, int windowWidth, int windowHeight, FruitHelper helper, int iteration = 1 )
+    private static void PredictProcess(Bitmap image, Bitmap outputImage, int pointX, int pointY, int windowWidth, int windowHeight, FruitHelper helper, int iteration = 1)
     {
+        if (iteration == 3 || (iteration > 1 && (windowWidth < 100 || windowHeight < 100)))
+        {
+            return;
+        }
         var point = new Point(pointX, pointY);
         var size = new Size(windowWidth, windowHeight);
 
@@ -122,7 +126,7 @@ public static class ImageHandler
 
         var output = FruitClassificator.Predict(sampleData);
 
-        if (output.Score.Max() > 0.9 || iteration == 3)
+        if (output.Score.Max() > 0.9)
         {
             using Graphics gfx = Graphics.FromImage(outputImage);
             using SolidBrush brush = new SolidBrush(helper.GetColor(output.PredictedLabel));
@@ -131,12 +135,18 @@ public static class ImageHandler
 
             gfx.FillRectangle(brush, rect);
 
-            var labels = FruitClassificator.GetSortedScoresWithLabels(output).Take(3);
+            StringFormat stringFormat = new StringFormat()
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+
+            var labels = FruitClassificator.GetSortedScoresWithLabels(output).Take(1);
             var text = string.Join("\n", labels.Select(l => $"{string.Join("", l.Key.Take(5))}: {l.Value.ToString("0.00")}"));
             gfx.SmoothingMode = SmoothingMode.AntiAlias;
             gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
             gfx.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            gfx.DrawString(text, new Font("Tahoma", 10), Brushes.Black, rect);
+            gfx.DrawString(text, new Font("Tahoma", 20), Brushes.Black, rect, stringFormat);
         }
         else
         {

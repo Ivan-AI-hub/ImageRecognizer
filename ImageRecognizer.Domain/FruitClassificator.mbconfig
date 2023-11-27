@@ -17,8 +17,8 @@
         "Version": 1,
         "Type": "Trial",
         "TrainerName": "ImageClassificationMulti",
-        "Score": 0.99966236217828286,
-        "RuntimeInSeconds": 9213.748,
+        "Score": 0.99899749373433588,
+        "RuntimeInSeconds": 3888.785,
         "Parameter": {
           "_SCHEMA_": "e0 * e1 * e2",
           "e0": {
@@ -47,7 +47,7 @@
       "e2": "MapKeyToValue"
     },
     "Schema": "e0 * e1 * e2",
-    "MetricName": "MacroAccuracy",
+    "MetricName": "MicroAccuracy",
     "ModelFilePath": "D:\\For laba\\1.Ready laboratory\\4 course\\Course\\PSP\\ImageRecognizer\\ImageRecognizer.Domain\\FruitClassificator.mlnet"
   },
   "Type": "TrainingConfig",
@@ -56,7 +56,7 @@
     "Version": 1,
     "Type": "ClassificationTrainingOption",
     "TrainingTime": 2147483647,
-    "OptimizeMetric": "MacroAccuracy",
+    "OptimizeMetric": "MicroAccuracy",
     "ValidationOption": {
       "Version": 0,
       "Type": "TrainValidateSplitValidationOption",

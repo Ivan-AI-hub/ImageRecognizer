@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Collections.Generic;
-namespace ImageRecognizer_Domain
+namespace ImageRecognizer_LogicUnit
 {
     public partial class FruitClassificator
     {
