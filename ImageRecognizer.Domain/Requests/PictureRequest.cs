@@ -1,4 +1,4 @@
-﻿namespace ImageRecognizer.Domain;
+﻿namespace ImageRecognizer.Domain.Requests;
 
 public class PictureRequest
 {

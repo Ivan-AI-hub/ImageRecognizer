@@ -5,11 +5,16 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text;
 using ImageRecognizer.Domain.Extencions;
+using ImageRecognizer.Domain.Requests;
+using ImageRecognizer.Domain.Responses;
+using ImageRecognizer.Domain.Helpers;
+using System.Diagnostics;
 
 namespace ImageRecognizer.DistributionServer.Controllers;
 
 public class DistributorController : ControllerBase
 {
+    private const int _minWindowsByUnit = 3;
     private string[] _logicUnitsUrls => LogicUnitStorage.FreeUnitsUrls.ToArray();
     private int UnitsCount => LogicUnitStorage.FreeUnitsCount;
 
@@ -54,25 +59,28 @@ public class DistributorController : ControllerBase
 
         var unitsAndWindows = CalculateWinowsByUnits(windows);
 
-        int windowsReminder = windows - unitsAndWindows.windowsByUnits * unitsAndWindows.units;
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         Console.WriteLine("Image processing start");
         Console.WriteLine($"LogicUnits: {UnitsCount}");
         Console.WriteLine($"used units: {unitsAndWindows.units}");
+        Console.WriteLine($"windows: {windows}");
         Console.WriteLine($"windows by unit: {unitsAndWindows.windowsByUnits}");
-        Console.WriteLine($"reminder: {windowsReminder}");
+        Console.WriteLine($"reminder: {unitsAndWindows.windowsReminder}");
 
-        var postTasks = SendDataToLogicUnits(image, unitsAndWindows.units, unitsAndWindows.windowsByUnits, 
-                                    windowsReminder, content.WindowWidth, widthReminder, 
+        var postTasks = SendDataToLogicUnits(image, unitsAndWindows.units, unitsAndWindows.windowsByUnits,
+                                    unitsAndWindows.windowsReminder, content.WindowWidth, widthReminder, 
                                     content.WindowHeight, content.Picture.Name);
 
         HttpResponseMessage[] results = await Task.WhenAll(postTasks);
 
         using var outputImage = await ConcatHeatMapsAsync(results, image.Width, image.Height,
-                                                          unitsAndWindows.units, unitsAndWindows.windowsByUnits, windowsReminder, 
+                                                          unitsAndWindows.units, unitsAndWindows.windowsByUnits, unitsAndWindows.windowsReminder, 
                                                           content.WindowWidth, widthReminder);
 
-        Console.WriteLine("Image processing stop");
+        stopwatch.Stop();
+        Console.WriteLine($"Image processing stop, Elaped {stopwatch.ElapsedMilliseconds}");
 
         var pictureResponse = new PictureResponse()
         {
@@ -89,27 +97,52 @@ public class DistributorController : ControllerBase
         responseStream.Close();
     }
 
-    private (int windowsByUnits, int units) CalculateWinowsByUnits(int windowsCount)
+    private (int windowsByUnits, int units, int windowsReminder) CalculateWinowsByUnits(int windowsCount)
     { 
+        int currWindowsCount = windowsCount;
         int windowsByUnits = 0;
-        int units = UnitsCount + 1;
+        int units = UnitsCount;
+        int windowsReminder = 0;
 
         while (windowsByUnits == 0)
         {
-            units--;
-
             if (units == 0)
             {
                 units = 1;
                 windowsByUnits = 1;
                 break;
             }
-            
-            windowsByUnits = windowsCount / units;
-            
+
+            double winows = (double)currWindowsCount / units;
+            if(winows < _minWindowsByUnit)
+            {
+                units--;
+            }
+            else if(winows % 1 == 0)
+            {
+                windowsByUnits = (int)winows;
+            }
+            else if(winows > 1)
+            {
+                windowsReminder--;
+                currWindowsCount++;
+            }
+            else if(winows < 1)
+            {
+                units--;
+            }
+
+            if (winows <= Math.Abs(windowsReminder))
+            {
+                windowsReminder = 0;
+                currWindowsCount = windowsCount;
+                units--;
+            }
         }
 
-        return(windowsByUnits, units);
+        //windowsReminder = windows - unitsAndWindows.windowsByUnits * unitsAndWindows.units;
+
+        return (windowsByUnits, units, windowsReminder);
     }
 
     private IEnumerable<Task<HttpResponseMessage>> SendDataToLogicUnits(Bitmap image, int units, int windowsByUnit,

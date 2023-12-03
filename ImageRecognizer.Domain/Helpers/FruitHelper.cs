@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ImageRecognizer.Domain;
+namespace ImageRecognizer.Domain.Helpers;
 
 public class FruitHelper : IDisposable
 {

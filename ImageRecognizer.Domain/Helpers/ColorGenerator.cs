@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Drawing;
 
-namespace ImageRecognizer.Domain;
+namespace ImageRecognizer.Domain.Helpers;
 
 public static class ColorGenerator
 {
@@ -60,7 +60,7 @@ public static class ColorGenerator
                 points.Add(new[]
                 {
                 Math.Floor(i/(double)(numBase*numBase))/ (numBase - 1.0),
-                Math.Floor((i/(double)numBase) % numBase)/ (numBase - 1.0),
+                Math.Floor(i/(double)numBase % numBase)/ (numBase - 1.0),
                 Math.Floor((double)(i % numBase))/ (numBase - 1.0),
             });
             }

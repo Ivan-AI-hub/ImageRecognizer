@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-namespace ImageRecognizer.Domain;
+namespace ImageRecognizer.Domain.Helpers;
 
 public static class ImageHandler
 {
@@ -19,15 +19,15 @@ public static class ImageHandler
     }
     public static Bitmap ResizeImage(Image image, int width, int height, bool preserveAspectRatio)
     {
-        int drawWidth = width;
-        int drawHeight = height;
+        int drawWidth;
+        int drawHeight;
 
         if (preserveAspectRatio)
         {
             int originalWidth = image.Width;
             int originalHeight = image.Height;
-            float percentWidth = (float)width / (float)originalWidth;
-            float percentHeight = (float)height / (float)originalHeight;
+            float percentWidth = width / (float)originalWidth;
+            float percentHeight = height / (float)originalHeight;
             float percent = percentHeight < percentWidth ? percentHeight : percentWidth;
             drawWidth = (int)(originalWidth * percent);
             drawHeight = (int)(originalHeight * percent);
@@ -108,7 +108,7 @@ public static class ImageHandler
 
     private static void PredictProcess(Bitmap image, Bitmap outputImage, int pointX, int pointY, int windowWidth, int windowHeight, FruitHelper helper, int iteration = 1)
     {
-        if (iteration == 3 || (iteration > 1 && (windowWidth < 100 || windowHeight < 100)))
+        if (iteration == 3 || iteration > 1 && (windowWidth < 100 || windowHeight < 100))
         {
             return;
         }
@@ -126,7 +126,11 @@ public static class ImageHandler
 
         var output = FruitClassificator.Predict(sampleData);
 
-        if (output.Score.Max() > 0.9)
+        if(output.PredictedLabel == "Fons")
+        {
+            return;
+        }
+        else if (output.Score.Max() > 0.6)
         {
             using Graphics gfx = Graphics.FromImage(outputImage);
             using SolidBrush brush = new SolidBrush(helper.GetColor(output.PredictedLabel));
@@ -150,13 +154,13 @@ public static class ImageHandler
         }
         else
         {
-            for (int i = 0; i < windowWidth; i += windowWidth/2)
+            for (int i = 0; i < windowWidth; i += windowWidth / 2)
             {
-                for (int j = 0; j < windowHeight; j += windowHeight/2)
+                for (int j = 0; j < windowHeight; j += windowHeight / 2)
                 {
-                    PredictProcess(image, outputImage, pointX + i, pointY + j, windowWidth/2, windowHeight/2, helper, iteration + 1);
+                    PredictProcess(image, outputImage, pointX + i, pointY + j, windowWidth / 2, windowHeight / 2, helper, iteration + 1);
                 }
             }
-        }    
+        }
     }
 }

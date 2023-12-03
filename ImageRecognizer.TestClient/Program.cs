@@ -1,5 +1,7 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 using ImageRecognizer.Domain;
+using ImageRecognizer.Domain.Requests;
 
 string filePatch;
 int windowHeight;
@@ -36,8 +38,19 @@ var request = new PictureRequest()
     WindowHeight = windowHeight,
     WindowWidth = windowWidth,
 };
+Stopwatch stopwatch = new Stopwatch();
 
-using HttpClient client = new HttpClient();
-int port = 5100;
-await client.PostAsJsonAsync($"http://127.0.0.1:{port}/", request);
-client.Dispose();
+while (true)
+{
+    using HttpClient client = new HttpClient();
+    int port = 5100;
+    stopwatch.Start();
+    var res = await client.PostAsJsonAsync($"http://127.0.0.1:{port}/predict", request);
+    stopwatch.Stop();
+    client.Dispose();
+    Console.WriteLine($"Elapsed: {stopwatch.ElapsedMilliseconds}");
+    Console.WriteLine("press anything to resend...");
+    Console.ReadLine();
+
+    stopwatch.Restart();
+}

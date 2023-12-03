@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace ImageRecognizer.Domain;
+namespace ImageRecognizer.Domain.Helpers;
 
 public class ImageCreator
 {

@@ -1,12 +1,26 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Json;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
-using ImageRecognizer.Domain;
 using ImageRecognizer.Domain.Extencions;
+using ImageRecognizer.Domain.Helpers;
+using ImageRecognizer.Domain.Requests;
+using ImageRecognizer.Domain.Responses;
 
-int serverPort = 5100;
+string serverAddress = "127.0.0.1";
+
+Console.WriteLine("Write server address, or press enter");
+string? wrServer = Console.ReadLine();
+
+if (!string.IsNullOrEmpty(wrServer))
+{
+    serverAddress = wrServer;
+}
+
+string serverUrl = $"http://{serverAddress}:5100";
+
 int port = GetRandomUnusedPort();
 
 var server = new HttpListener();
@@ -18,17 +32,23 @@ var request = new LogicUnitRequest()
     Port = port,
 };
 
-using HttpClient startClient = new HttpClient();
-await startClient.PostAsJsonAsync($"http://127.0.0.1:{serverPort}/logicUnit", request);
-startClient.Dispose();
+try
+{
+    using HttpClient startClient = new HttpClient();
+    await startClient.PostAsJsonAsync($"{serverUrl}/logicUnit", request);
+    startClient.Dispose();
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex.ToString());
+    Console.ReadLine();
+}
 
-Console.WriteLine($"Server is listener at the https://localhost:{port}");
+Console.WriteLine($"Unit is listener at the http://127.0.0.1:{port}");
 
 while (true)
 {
     var client = await server.GetContextAsync();
-
-    Console.WriteLine("+1 request");
 
     ThreadPool.QueueUserWorkItem((status) => HandleClientsAsync(client));
 }
@@ -42,6 +62,9 @@ void HandleClientsAsync(HttpListenerContext client)
         {
             return;
         }
+
+        Stopwatch stopwatch = new Stopwatch();
+        stopwatch.Start();
 
         Console.WriteLine("Image prediction start");
         var content = request.GetData<PictureRequest>();
@@ -63,11 +86,11 @@ void HandleClientsAsync(HttpListenerContext client)
         responseStream.Write(buffer, 0, buffer.Length);
         responseStream.Close();
 
-        Console.WriteLine($"Image prediction stopped with Base64:\n{pictureResponse.HeatMapBase64}");
+        stopwatch.Stop();
+        Console.WriteLine($"Image prediction stop, elapsed {stopwatch.ElapsedMilliseconds}");
     }
     finally
     {
-        Console.WriteLine("-1 request");
         client.Response.Close();
     }
 }

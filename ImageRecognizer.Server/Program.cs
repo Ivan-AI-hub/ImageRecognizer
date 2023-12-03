@@ -1,9 +1,7 @@
-﻿using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Net;
-using ImageRecognizer.Domain;
+﻿using System.Net;
 using ImageRecognizer.Domain.Extencions;
-using ImageRecognizer_Domain;
+using ImageRecognizer.Domain.Helpers;
+using ImageRecognizer.Domain.Requests;
 
 int port = 5000;
 
@@ -11,7 +9,7 @@ var server = new HttpListener();
 server.Prefixes.Add($"http://127.0.0.1:{port}/");
 server.Start();
 
-Console.WriteLine($"Server is listener at the https://localhost:{port}");
+Console.WriteLine($"Logic unit is listener at the http://127.0.0.1:{port}");
 
 while (true)
 {

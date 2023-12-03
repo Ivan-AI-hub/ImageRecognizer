@@ -1,6 +1,5 @@
-﻿
-using ImageRecognizer.Domain;
-using ImageRecognizer.Domain.Extencions;
+﻿using ImageRecognizer.Domain.Extencions;
+using ImageRecognizer.Domain.Requests;
 using System.Net;
 
 namespace ImageRecognizer.DistributionServer.Controllers;
@@ -32,6 +31,8 @@ public class LogicUnitsController : ControllerBase
     {
         var content = client.Request.GetData<LogicUnitRequest>();
         Console.WriteLine("+1 logic unit");
-        LogicUnitStorage.AddUnit($"http://127.0.0.1:{content.Port}/");
+        var url = $"http://{client.Request.RemoteEndPoint.Address}:{content.Port}/";
+
+        LogicUnitStorage.AddUnit(url);
     }
 }
