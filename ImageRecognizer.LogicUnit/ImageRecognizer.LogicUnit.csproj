@@ -10,9 +10,9 @@
     <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.ML" Version="2.0.0" />
-    <PackageReference Include="Microsoft.ML.Vision" Version="2.0.0" />
-    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.3.1" />
+    <PackageReference Include="Microsoft.ML" Version="3.0.0" />
+    <PackageReference Include="Microsoft.ML.Vision" Version="3.0.0" />
+    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.16.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ImageRecognizer.Domain\ImageRecognizer.Domain.csproj" />
