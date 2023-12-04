@@ -6,10 +6,10 @@ int port = 5100;
 var controllers = new List<ControllerBase>() { new IndexController(), new DistributorController(), new LogicUnitsController() };
 
 var server = new HttpListener();
-server.Prefixes.Add($"http://127.0.0.1:{port}/");
+server.Prefixes.Add($"http://26.152.192.178:{port}/");
 server.Start();
 
-Console.WriteLine($"Server is listener at the http://127.0.0.1:{port}");
+Console.WriteLine($"Server is listener at the http://localhost:{port}");
 
 while (true)
 {

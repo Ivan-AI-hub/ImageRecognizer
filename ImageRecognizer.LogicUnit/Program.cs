@@ -9,23 +9,17 @@ using ImageRecognizer.Domain.Helpers;
 using ImageRecognizer.Domain.Requests;
 using ImageRecognizer.Domain.Responses;
 
-string serverAddress = "127.0.0.1";
+string selfAddress = "127.0.0.1";
 
-Console.WriteLine("Write server address, or press enter");
+Console.WriteLine("Write address for listening, or press enter for using default one");
 string? wrServer = Console.ReadLine();
 
 if (!string.IsNullOrEmpty(wrServer))
 {
-    serverAddress = wrServer;
+    selfAddress = wrServer;
 }
 
-string serverUrl = $"http://{serverAddress}:5100";
-
 int port = GetRandomUnusedPort();
-
-var server = new HttpListener();
-server.Prefixes.Add($"http://127.0.0.1:{port}/");
-server.Start();
 
 var request = new LogicUnitRequest()
 {
@@ -35,16 +29,21 @@ var request = new LogicUnitRequest()
 try
 {
     using HttpClient startClient = new HttpClient();
-    await startClient.PostAsJsonAsync($"{serverUrl}/logicUnit", request);
+    var res = await startClient.PostAsJsonAsync($"http://26.152.192.178:5100/logicUnit", request);
     startClient.Dispose();
 }
 catch (Exception ex)
 {
     Console.WriteLine(ex.ToString());
     Console.ReadLine();
+    return;
 }
 
-Console.WriteLine($"Unit is listener at the http://127.0.0.1:{port}");
+var server = new HttpListener();
+server.Prefixes.Add($"http://{selfAddress}:{port}/");
+server.Start();
+
+Console.WriteLine($"Unit is listener at the http://{selfAddress}:{port}");
 
 while (true)
 {
