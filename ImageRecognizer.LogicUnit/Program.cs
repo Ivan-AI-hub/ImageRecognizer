@@ -9,17 +9,9 @@ using ImageRecognizer.Domain.Helpers;
 using ImageRecognizer.Domain.Requests;
 using ImageRecognizer.Domain.Responses;
 
-string selfAddress = "127.0.0.1";
+AppContext.SetSwitch("System.Drawing.EnableUnixSupport", true);
 
-Console.WriteLine("Write address for listening, or press enter for using default one");
-string? wrServer = Console.ReadLine();
-
-if (!string.IsNullOrEmpty(wrServer))
-{
-    selfAddress = wrServer;
-}
-
-int port = GetRandomUnusedPort();
+int port = 5100;
 
 var request = new LogicUnitRequest()
 {
@@ -29,7 +21,7 @@ var request = new LogicUnitRequest()
 try
 {
     using HttpClient startClient = new HttpClient();
-    var res = await startClient.PostAsJsonAsync($"http://26.152.192.178:5100/logicUnit", request);
+    var res = await startClient.PostAsJsonAsync($"http://172.20.0.2:5100/logicUnit", request);
     startClient.Dispose();
 }
 catch (Exception ex)
@@ -39,11 +31,12 @@ catch (Exception ex)
     return;
 }
 
+var localAddress = GetLocalIPAddress();
 var server = new HttpListener();
-server.Prefixes.Add($"http://{selfAddress}:{port}/");
+server.Prefixes.Add($"http://{localAddress}:{port}/");
 server.Start();
 
-Console.WriteLine($"Unit is listener at the http://{selfAddress}:{port}");
+Console.WriteLine($"Unit is listener at the http://{localAddress}:{port}");
 
 while (true)
 {
@@ -101,4 +94,17 @@ int GetRandomUnusedPort()
     var port = ((IPEndPoint)listener.LocalEndpoint).Port;
     listener.Stop();
     return port;
+}
+
+string GetLocalIPAddress()
+{
+    var host = Dns.GetHostEntry(Dns.GetHostName());
+    foreach (var ip in host.AddressList)
+    {
+        if (ip.AddressFamily == AddressFamily.InterNetwork)
+        {
+            return ip.ToString();
+        }
+    }
+    throw new Exception("No network adapters with an IPv4 address in the system!");
 }

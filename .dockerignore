@@ -28,3 +28,7 @@ README.md
 !.git/config
 !.git/packed-refs
 !.git/refs/heads/**
+/ImageRecognizer.Domain/Labels
+/ImageRecognizer.DistributionServer/Results
+/ImageRecognizer.Server/Results
+/ImageRecognizer.TestClient/Data

@@ -19,15 +19,15 @@ public class IndexController : ControllerBase
         {
             if (request.RawUrl == "/")
             {
-                SendFile(client, "wwwroot\\index.html", "text/html");
+                SendFile(client, "wwwroot/index.html", "text/html");
             }
             else if (request.RawUrl == "/styles.css")
             {
-                SendFile(client, "wwwroot\\styles.css", "text/css");
+                SendFile(client, "wwwroot/styles.css", "text/css");
             }
             else if (request.RawUrl == "/script.js")
             {
-                SendFile(client, "wwwroot\\script.js", "text/javascript");
+                SendFile(client, "wwwroot/script.js", "text/javascript");
             }
         }
 

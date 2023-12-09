@@ -1,5 +1,4 @@
 ﻿using ImageRecognizer.Domain;
-using System.Drawing;
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
@@ -9,6 +8,7 @@ using ImageRecognizer.Domain.Requests;
 using ImageRecognizer.Domain.Responses;
 using ImageRecognizer.Domain.Helpers;
 using System.Diagnostics;
+using System.Drawing;
 
 namespace ImageRecognizer.DistributionServer.Controllers;
 

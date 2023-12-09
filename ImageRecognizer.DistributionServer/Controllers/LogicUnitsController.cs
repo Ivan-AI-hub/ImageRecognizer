@@ -30,8 +30,9 @@ public class LogicUnitsController : ControllerBase
     private void AddLogicUnit(HttpListenerContext client)
     {
         var content = client.Request.GetData<LogicUnitRequest>();
-        Console.WriteLine("+1 logic unit");
         var url = $"http://{client.Request.RemoteEndPoint.Address}:{content.Port}/";
+
+        Console.WriteLine($"+1 logic unit {url}");
 
         LogicUnitStorage.AddUnit(url);
     }

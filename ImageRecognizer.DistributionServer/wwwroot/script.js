@@ -32,7 +32,7 @@ document.getElementById('form').addEventListener('submit', function (e) {
 
         loader.style.color = "black"; // show the loader before sending the request
 
-        fetch('http://26.152.192.178:5100/predict', {
+        fetch('http://localhost:5100/predict', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
