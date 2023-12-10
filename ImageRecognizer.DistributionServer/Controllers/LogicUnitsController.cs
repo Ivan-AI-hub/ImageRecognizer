@@ -22,18 +22,33 @@ public class LogicUnitsController : ControllerBase
             {
                 AddLogicUnit(client);
             }
+            else if(request.HttpMethod == HttpMethod.Delete.Method)
+            {
+                RemoveLogicUnit(client);
+            }
         }
 
         client.Response.Close();
     }
 
+    private void RemoveLogicUnit(HttpListenerContext client)
+    {
+        var url = client.Request.RemoteEndPoint.Address;
+
+        LogicUnitStorage.RemoveUnit(LogicUnitStorage.FreeUnitsUrls.First(x => x.Contains(url.ToString())));
+
+        Console.WriteLine($"-1 logic unit {url}");
+        Console.WriteLine($"logicUnits {LogicUnitStorage.FreeUnitsCount}");
+    }
+
     private void AddLogicUnit(HttpListenerContext client)
     {
         var content = client.Request.GetData<LogicUnitRequest>();
-        var url = $"http://{client.Request.RemoteEndPoint.Address}:{content.Port}/";
-
-        Console.WriteLine($"+1 logic unit {url}");
+        var url = $"http://localhost:{content.Port}/";
 
         LogicUnitStorage.AddUnit(url);
+
+        Console.WriteLine($"+1 logic unit {url}");
+        Console.WriteLine($"logicUnits {LogicUnitStorage.FreeUnitsCount}");
     }
 }

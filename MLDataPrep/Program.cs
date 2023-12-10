@@ -8,7 +8,7 @@ var path = "D:\\For laba\\1.Ready laboratory\\4 course\\Course\\PSP\\ImageRecogn
 ImageCreator imageCreator = new ImageCreator();
 using var image = imageCreator.CreateTestImage(path);
 
-image.Save($"{path}test.jpg");
+//image.Save($"{path}test.jpg");
 //foreach (string directory in Directory.EnumerateDirectories(path))
 //{
 //    Console.WriteLine($"Start {directory} directory");

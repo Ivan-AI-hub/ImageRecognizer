@@ -14,11 +14,18 @@ Console.WriteLine($"Server is listener at the http://localhost:{port}/");
 
 while (true)
 {
-    var client = await server.GetContextAsync();
+    try
+    {
+        var client = await server.GetContextAsync();
 
-    Console.WriteLine($"Start working on request {client.Request.Url}");
+        Console.WriteLine($"Start working on request {client.Request.Url}");
 
-    ThreadPool.QueueUserWorkItem((status) => HandleClientsAsync(client));
+        ThreadPool.QueueUserWorkItem((status) => HandleClientsAsync(client));
+    }
+    catch(Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+    }
 }
 
 async void HandleClientsAsync(HttpListenerContext client)

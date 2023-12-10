@@ -1,46 +1,43 @@
 ﻿using ImageRecognizer_LogicUnit;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
+using SkiaSharp;
 
 namespace ImageRecognizer.Domain.Helpers;
 
 public static class ImageHandler
 {
-    public static Bitmap ConvertBase64ToBitmap(string base64String)
+    public static SKBitmap ConvertBase64ToBitmap(string base64String)
     {
+        Console.WriteLine($"{DateTime.Now} b64 {base64String.Length}");
+
         var bytes = Convert.FromBase64String(base64String);
+        using MemoryStream memoryStream = new(bytes)
+        {
+            Position = 0
+        };
 
-        MemoryStream memoryStream = new MemoryStream(bytes);
-
-        memoryStream.Position = 0;
-
-        return new Bitmap(memoryStream);
+        return SKBitmap.Decode(memoryStream);
     }
 
-    public static Bitmap CropImage(Bitmap image, Point point, Size size)
+    public static SKBitmap CropImage(SKBitmap image, SKPointI point, SKSizeI size)
     {
-        Rectangle section = new Rectangle(point, size);
+        SKRectI rectI = new(point.X, point.Y, point.X + size.Width, point.Y + size.Height);
+        SKBitmap subset = new(image.Info);
 
-        Bitmap target = new Bitmap(size.Width, size.Height);
-        using Graphics g = Graphics.FromImage(target);
+        image.ExtractSubset(subset, rectI);
 
-        g.DrawImage(image, new Rectangle(0, 0, target.Width, target.Height),
-            section,
-            GraphicsUnit.Pixel);
-
-        return target;
+        return subset;
     }
 
-    public static byte[] ConvertImageToByteArray(Bitmap image)
+    public static byte[] ConvertImageToByteArray(SKBitmap image)
     {
-        ImageConverter converter = new ImageConverter();
-        return (byte[])converter.ConvertTo(image, typeof(byte[]));
+        using var stream = new MemoryStream();
+        image.Encode(SKEncodedImageFormat.Png, 100).SaveTo(stream);
+        return stream.ToArray();
     }
 
-    public static Bitmap PredictImage(Bitmap image, int width, int height)
+    public static SKBitmap PredictImage(SKBitmap image, int width, int height)
     {
-        var outputImage = new Bitmap(image);
+        var outputImage = image.Copy();
 
         var widthReminder = image.Width % width;
         var heightReminder = image.Height % height;
@@ -50,7 +47,7 @@ public static class ImageHandler
         Console.WriteLine($"Window ({width}X{height})");
         Console.WriteLine($"Reminder ({widthReminder}X{heightReminder})");
 
-        using FruitHelper helper = new FruitHelper(100, 28);
+        using FruitHelper helper = new(100, 28);
 
         for (int i = 0; i < image.Width; i += width)
         {
@@ -63,14 +60,14 @@ public static class ImageHandler
         return outputImage;
     }
 
-    private static void PredictProcess(Bitmap image, Bitmap outputImage, int pointX, int pointY, int windowWidth, int windowHeight, FruitHelper helper, int iteration = 1)
+    private static void PredictProcess(SKBitmap image, SKBitmap outputImage, int pointX, int pointY, int windowWidth, int windowHeight, FruitHelper helper, int iteration = 1)
     {
         if (iteration == 3 || iteration > 1 && (windowWidth < 100 || windowHeight < 100))
         {
             return;
         }
-        var point = new Point(pointX, pointY);
-        var size = new Size(windowWidth, windowHeight);
+        var point = new SKPointI(pointX, pointY);
+        var size = new SKSizeI(windowWidth, windowHeight);
 
         using var cropped = CropImage(image, point, size);
 
@@ -83,31 +80,35 @@ public static class ImageHandler
 
         var output = FruitClassificator.Predict(sampleData);
 
-        if(output.PredictedLabel == "Fons")
+        if (output.PredictedLabel == "Fons")
         {
             return;
         }
         else if (output.Score.Max() > 0.6)
         {
-            using Graphics gfx = Graphics.FromImage(outputImage);
-            using SolidBrush brush = new SolidBrush(helper.GetColor(output.PredictedLabel));
+            using var canvas = new SKCanvas(outputImage);
+            using var paint = new SKPaint { Color = helper.GetColor(output.PredictedLabel) };
 
-            var rect = new RectangleF(point, size);
+            var rect = new SKRect(point.X, point.Y, point.X + size.Width, point.Y + size.Height);
 
-            gfx.FillRectangle(brush, rect);
-
-            StringFormat stringFormat = new StringFormat()
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center
-            };
+            canvas.DrawRect(rect, paint);
 
             var labels = FruitClassificator.GetSortedScoresWithLabels(output).Take(1);
             var text = string.Join("\n", labels.Select(l => $"{string.Join("", l.Key.Take(5))}: {l.Value.ToString("0.00")}"));
-            gfx.SmoothingMode = SmoothingMode.AntiAlias;
-            gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            gfx.PixelOffsetMode = PixelOffsetMode.HighQuality;
-            gfx.DrawString(text, new Font("Tahoma", 20), Brushes.Black, rect, stringFormat);
+
+            using var textPaint = new SKPaint
+            {
+                Color = SKColors.Black,
+                IsAntialias = true,
+                Style = SKPaintStyle.Fill,
+                TextAlign = SKTextAlign.Center,
+                TextSize = 20.0f,
+                Typeface = SKTypeface.CreateDefault(),
+            };
+
+            float xText = rect.MidX;
+            float yText = rect.MidY + textPaint.TextSize / 2;
+            canvas.DrawText(text, xText, yText, textPaint);
         }
         else
         {

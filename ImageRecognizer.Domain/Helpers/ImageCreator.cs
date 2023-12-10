@@ -1,19 +1,19 @@
-﻿using System.Drawing;
+﻿using SkiaSharp;
 
 namespace ImageRecognizer.Domain.Helpers;
 
 public class ImageCreator
 {
-    public Bitmap CreateTestImage(string labelsPath)
+    public SKBitmap CreateTestImage(string labelsPath)
     {
         var directories = Directory.GetDirectories(labelsPath);
-        var images = new List<Bitmap>();
+        var images = new List<SKBitmap>();
 
         foreach (var directory in directories)
         {
             var imageFiles = Directory.GetFiles(directory);
 
-            var image = new Bitmap(imageFiles.First());
+            var image = SKBitmap.Decode(imageFiles.First());
             images.Add(image);
         }
 
@@ -22,7 +22,7 @@ public class ImageCreator
         return outputImage;
     }
 
-    private Bitmap CombineImages(List<Bitmap> images)
+    private SKBitmap CombineImages(List<SKBitmap> images)
     {
         var numRows = (int)Math.Ceiling(Math.Sqrt(images.Count));
         var numCols = numRows;
@@ -30,9 +30,9 @@ public class ImageCreator
         var outputWidth = images[0].Width * numCols;
         var outputHeight = images[0].Height * numRows;
 
-        var outputImage = new Bitmap(outputWidth, outputHeight);
+        var outputImage = new SKBitmap(outputWidth, outputHeight);
 
-        using var g = Graphics.FromImage(outputImage);
+        using var canvas = new SKCanvas(outputImage);
 
         for (var i = 0; i < numRows; i++)
         {
@@ -45,7 +45,7 @@ public class ImageCreator
                     var x = j * images[0].Width;
                     var y = i * images[0].Height;
 
-                    g.DrawImage(images[imageIndex], x, y);
+                    canvas.DrawBitmap(images[imageIndex], new SKRect(x, y, x + images[0].Width, y + images[0].Height));
                 }
             }
         }

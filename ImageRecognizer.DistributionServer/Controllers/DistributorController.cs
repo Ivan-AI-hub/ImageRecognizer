@@ -8,7 +8,7 @@ using ImageRecognizer.Domain.Requests;
 using ImageRecognizer.Domain.Responses;
 using ImageRecognizer.Domain.Helpers;
 using System.Diagnostics;
-using System.Drawing;
+using SkiaSharp;
 
 namespace ImageRecognizer.DistributionServer.Controllers;
 
@@ -145,22 +145,22 @@ public class DistributorController : ControllerBase
         return (windowsByUnits, units, windowsReminder);
     }
 
-    private IEnumerable<Task<HttpResponseMessage>> SendDataToLogicUnits(Bitmap image, int units, int windowsByUnit,
+    private IEnumerable<Task<HttpResponseMessage>> SendDataToLogicUnits(SKBitmap image, int units, int windowsByUnit,
                                                                int windowsReminder, int windowWidth, int widthReminder,
                                                                int windowHeight, string pictureName)
     {
         var postTasks = new List<Task<HttpResponseMessage>>();
         for (int i = 0; i < units; i++)
         {
-            var point = new Point(windowsByUnit * i * windowWidth, 0);
-            Size size;
+            var point = new SKPointI(windowsByUnit * i * windowWidth, 0);
+            SKSizeI size;
             if (i == units - 1)
             {
-                size = new Size((windowsByUnit + windowsReminder) * windowWidth + widthReminder, image.Height);
+                size = new SKSizeI((windowsByUnit + windowsReminder) * windowWidth + widthReminder, image.Height);
             }
             else
             {
-                size = new Size(windowsByUnit * windowWidth, image.Height);
+                size = new SKSizeI(windowsByUnit * windowWidth, image.Height);
             }
             Console.WriteLine($"{point}, {size}");
             var cropped = ImageHandler.CropImage(image, point, size);
@@ -177,6 +177,7 @@ public class DistributorController : ControllerBase
                 WindowHeight = windowHeight,
                 WindowWidth = windowWidth,
             };
+            Console.WriteLine(picture.Base64Content);
 
             HttpClient unitClient = new HttpClient();
 
@@ -189,7 +190,7 @@ public class DistributorController : ControllerBase
         return postTasks;
     }
 
-    private async Task<Bitmap> ConcatHeatMapsAsync(HttpResponseMessage[] logicUnitResponses, int imageWidth, int imageHeight, 
+    private async Task<SKBitmap> ConcatHeatMapsAsync(HttpResponseMessage[] logicUnitResponses, int imageWidth, int imageHeight,
                                                     int units, int windowsByUnit,
                                                     int windowsReminder, int windowWidth, int widthReminder)
     {
@@ -199,24 +200,33 @@ public class DistributorController : ControllerBase
 
         LogicUnitStorage.RemoveWorkerUnits(uris);
 
-        var outputImage = new Bitmap(imageWidth, imageHeight);
-        var gr = Graphics.FromImage(outputImage);
+        var outputImage = new SKBitmap(imageWidth, imageHeight);
+
+        using var canvas = new SKCanvas(outputImage);
         for (int i = 0; i < units; i++)
         {
-            var point = new Point(windowsByUnit * i * windowWidth, 0);
-            Size size;
+            var point = new SKPointI(windowsByUnit * i * windowWidth, 0);
+            SKSizeI size;
             if (i == units - 1)
             {
-                size = new Size((windowsByUnit + windowsReminder) * windowWidth + widthReminder, imageHeight);
+                size = new SKSizeI((windowsByUnit + windowsReminder) * windowWidth + widthReminder, imageHeight);
             }
             else
             {
-                size = new Size(windowsByUnit * windowWidth, imageHeight);
+                size = new SKSizeI(windowsByUnit * windowWidth, imageHeight);
             }
 
             var heatMap = await heatMaps[i];
 
-            gr.DrawImage(ImageHandler.ConvertBase64ToBitmap(heatMap.HeatMapBase64), point.X, point.Y, size.Width, size.Height);
+            using var heatMapBitmap = ImageHandler.ConvertBase64ToBitmap(heatMap.HeatMapBase64);
+
+            var sourceRect = new SKRect(0, 0, heatMapBitmap.Width, heatMapBitmap.Height);
+            var destRect = new SKRect(point.X, point.Y, size.Width, size.Height);
+
+            Console.WriteLine(sourceRect);
+            Console.WriteLine(destRect);
+
+            canvas.DrawBitmap(heatMapBitmap, sourceRect, destRect);
         }
 
         return outputImage;

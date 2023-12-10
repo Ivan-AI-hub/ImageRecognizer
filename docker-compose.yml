@@ -3,7 +3,7 @@ services:
   server:
     container_name: server
     build:
-      dockerfile: ServerDockerfile
+      dockerfile: Server.Dockerfile
     networks:
       my-network:
         ipv4_address: 172.20.0.2
@@ -15,7 +15,7 @@ services:
     depends_on:
       - server
     build:
-      dockerfile: ServerNodeDockerfile
+      dockerfile: ServerNode.Dockerfile
     networks:
       my-network:
 
@@ -24,7 +24,7 @@ services:
     depends_on:
       - server
     build:
-      dockerfile: ServerNodeDockerfile
+      dockerfile: ServerNode.Dockerfile
     networks:
       my-network:
 

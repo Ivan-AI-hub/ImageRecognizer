@@ -1,5 +1,5 @@
-﻿using System.Collections;
-using System.Drawing;
+﻿using SkiaSharp;
+using System.Collections;
 
 namespace ImageRecognizer.Domain.Helpers;
 
@@ -128,17 +128,18 @@ public static class ColorGenerator
         }
     }
 
-    public static IEnumerable<Color> Generate(int alpha, int numOfColors)
+    public static IEnumerable<SKColor> Generate(byte alpha, int numOfColors)
     {
         var points = new Points(numOfColors);
 
         foreach (var point in points)
         {
             var rgb = RYB.ToRgb(point[0], point[1], point[2]);
-            yield return Color.FromArgb(alpha,
-                (int)Math.Floor(255 * rgb[0]),
-                (int)Math.Floor(255 * rgb[1]),
-                (int)Math.Floor(255 * rgb[2]));
+
+            yield return new SKColor((byte)Math.Floor(255 * rgb[0]),
+                (byte)Math.Floor(255 * rgb[1]),
+                (byte)Math.Floor(255 * rgb[2]),
+                alpha);
         }
     }
 }

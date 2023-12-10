@@ -10,8 +10,7 @@ using ImageRecognizer.Domain.Requests;
 using ImageRecognizer.Domain.Responses;
 
 AppContext.SetSwitch("System.Drawing.EnableUnixSupport", true);
-
-int port = 5100;
+int port = 5101;
 
 var request = new LogicUnitRequest()
 {
@@ -22,6 +21,7 @@ try
 {
     using HttpClient startClient = new HttpClient();
     var res = await startClient.PostAsJsonAsync($"http://172.20.0.2:5100/logicUnit", request);
+    AppDomain.CurrentDomain.ProcessExit += (s, e) => LogicUnitClose();
     startClient.Dispose();
 }
 catch (Exception ex)
@@ -60,6 +60,12 @@ void HandleClientsAsync(HttpListenerContext client)
 
         Console.WriteLine("Image prediction start");
         var content = request.GetData<PictureRequest>();
+        if(content is null)
+        {
+            return;
+        }
+
+        Console.WriteLine($"Base64Count: {content.Picture.Base64Content.Length}");
 
         using var image = ImageHandler.ConvertBase64ToBitmap(content.Picture.Base64Content);
         using var outputImage = ImageHandler.PredictImage(image, content.WindowWidth, content.WindowHeight);
@@ -80,6 +86,7 @@ void HandleClientsAsync(HttpListenerContext client)
 
         stopwatch.Stop();
         Console.WriteLine($"Image prediction stop, elapsed {stopwatch.ElapsedMilliseconds}");
+        Console.WriteLine(pictureResponse.HeatMapBase64);
     }
     finally
     {
@@ -107,4 +114,11 @@ string GetLocalIPAddress()
         }
     }
     throw new Exception("No network adapters with an IPv4 address in the system!");
+}
+
+async void LogicUnitClose()
+{
+    using HttpClient endClient = new HttpClient();
+    var res = await endClient.DeleteAsync($"http://172.20.0.2:5100/logicUnit");
+    endClient.Dispose();
 }

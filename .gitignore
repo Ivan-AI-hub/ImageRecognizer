@@ -365,3 +365,5 @@ FodyWeavers.xsd
 /ImageRecognizer.DistributionServer/Results
 /ImageRecognizer.Server/Results
 /ImageRecognizer.TestClient/Data
+/ImageRecognizer.DistributionServer/Properties/launchSettings.json
+
